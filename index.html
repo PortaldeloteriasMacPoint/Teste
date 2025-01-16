@@ -1,0 +1,258 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plataforma MacPoint</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Cabeçalho */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      background-color: #013220;
+      border-bottom: 3px solid #00ff00;
+    }
+
+    .header .menu-btn {
+      font-size: 24px;
+      cursor: pointer;
+      color: #fff;
+      border: none;
+      background: none;
+      outline: none;
+    }
+
+    .header .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header .user-info img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #00ff00;
+    }
+
+    /* Capa */
+    .cover {
+      width: 100%;
+      height: 200px;
+      background-image: url('https://via.placeholder.com/1920x200');
+      background-size: cover;
+      background-position: center;
+    }
+
+    /* Menu lateral */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      width: 250px;
+      height: 100%;
+      background-color: #013220;
+      border: 2px solid #00ff00;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 15px;
+      border-radius: 0 10px 10px 0;
+    }
+
+    .sidebar.right {
+      right: 0;
+      left: auto;
+      transform: translateX(100%);
+      border-radius: 10px 0 0 10px;
+    }
+
+    .sidebar.active {
+      transform: translateX(0);
+    }
+
+    .sidebar a {
+      text-decoration: none;
+      color: #fff;
+    }
+
+    .sidebar button {
+      width: 100%;
+      padding: 10px;
+      background-color: #000;
+      color: #fff;
+      border: 2px solid #00ff00;
+      cursor: pointer;
+      font-weight: bold;
+      text-align: center;
+      border-radius: 20px;
+    }
+
+    .sidebar button:hover {
+      background-color: #00ff00;
+      color: #000;
+    }
+
+    /* Conteúdo principal */
+    .content {
+      flex: 1;
+      padding: 20px;
+      text-align: center;
+    }
+
+    /* Rodapé */
+    footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #013220;
+      border-top: 3px solid #00ff00;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <!-- Cabeçalho -->
+  <header class="header">
+    <button class="menu-btn" id="menu-btn">☰</button>
+    <div class="user-info">
+      <img src="https://via.placeholder.com/40" alt="Avatar" id="user-avatar">
+      <span id="user-name">Carregando...</span>
+    </div>
+  </header>
+
+  <!-- Capa -->
+  <div class="cover"></div>
+
+  <!-- Menu lateral esquerdo -->
+  <nav class="sidebar" id="left-sidebar">
+    <a href="pagina-inicio.html"><button>Início</button></a>
+    <a href="modalidades.html"><button>Modalidades</button></a>
+    <a href="simuladores.html"><button>Simuladores</button></a>
+    <a href="gerador-jogos.html"><button>Gerador de Jogos</button></a>
+    <a href="desdobramentos.html"><button>Desdobramentos</button></a>
+    <a href="tabelas.html"><button>Tabelas</button></a>
+    <a href="analises-estatisticas.html"><button>Análises / Estatísticas</button></a>
+    <a href="planilhas.html"><button>Planilhas</button></a>
+    <a href="ebooks.html"><button>eBooks</button></a>
+    <a href="sobre-nos.html"><button>Sobre Nós</button></a>
+  </nav>
+
+  <!-- Menu lateral direito -->
+  <nav class="sidebar right" id="right-sidebar">
+    <div class="settings">
+      <button onclick="logout()">⚙ Sair</button>
+    </div>
+  </nav>
+
+  <!-- Conteúdo principal -->
+  <main class="content" id="main-content">
+    <h1>Bem-vindo à Plataforma MacPoint!</h1>
+    <p>Clique nos menus para acessar diferentes partes do site.</p>
+  </main>
+
+  <!-- Rodapé -->
+  <footer>
+    &copy; 2025 Portal de Loterias MacPoint. Todos os direitos reservados.
+  </footer>
+
+  <script>
+    const menuBtn = document.getElementById('menu-btn');
+    const leftSidebar = document.getElementById('left-sidebar');
+    const rightSidebar = document.getElementById('right-sidebar');
+    const mainContent = document.getElementById('main-content');
+    const userName = document.getElementById('user-name');
+    const userAvatar = document.getElementById('user-avatar');
+
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyAO3As6jMMmENtzaK9zlDADbpS9UlNxx8o",
+      authDomain: "mac-projeto-4e552.firebaseapp.com",
+      projectId: "mac-projeto-4e552",
+      storageBucket: "mac-projeto-4e552.appspot.com",
+      messagingSenderId: "537330451519",
+      appId: "1:537330451519:web:5a1b4c921119b5ee98e48a"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // Função para obter o usuário autenticado
+    function getAuthenticatedUser() {
+      return new Promise((resolve, reject) => {
+        const user = auth.currentUser;
+        if (user) {
+          resolve(user);
+        } else {
+          reject("Usuário não autenticado.");
+        }
+      });
+    }
+
+    // Verificar se o usuário está autenticado e pago (com status ativo)
+    async function checkAuthentication() {
+      try {
+        const user = await getAuthenticatedUser();
+        document.getElementById('user-name').textContent = user.displayName || user.email;
+        
+        // Verificar se o usuário tem status "ativo" e assinatura válida
+        const userRef = db.collection('users').doc(user.uid);
+        const doc = await userRef.get();
+
+        if (doc.exists && doc.data().status === 'ativo' && doc.data().subscriptionActive && doc.data().subscriptionEndDate > firebase.firestore.Timestamp.now()) {
+          console.log("Acesso permitido!");
+        } else {
+          alert("Sua assinatura expirou ou seu status não está ativo. Acesse a página de pagamento.");
+          window.location.href = "pagina-pagamento.html"; // Redireciona para a página de pagamento
+        }
+      } catch (error) {
+        alert("Você precisa estar autenticado para acessar esta página.");
+        window.location.href = "login.html"; // Redireciona para a página de login
+      }
+    }
+
+    // Logout
+    function logout() {
+      auth.signOut().then(() => {
+        alert("Você foi deslogado!");
+        window.location.href = "login.html";
+      });
+    }
+
+    // Alternar menus laterais
+    menuBtn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      rightSidebar.classList.remove('active'); // Fecha o menu direito
+      leftSidebar.classList.toggle('active'); // Alterna o menu esquerdo
+    });
+
+    // Fechar menus ao clicar fora
+    mainContent.addEventListener('click', () => {
+      leftSidebar.classList.remove('active');
+      rightSidebar.classList.remove('active');
+    });
+
+    // Verificar autenticação ao carregar a página
+    window.onload = checkAuthentication;
+  </script>
+</body>
+</html>
+
