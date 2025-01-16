@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -155,10 +156,10 @@
     <a href="sobre-nos.html"><button>Sobre Nós</button></a>
   </nav>
 
-  <!-- Menu lateral direito -->
+  <!-- Menu lateral direito (com botão de logout) -->
   <nav class="sidebar right" id="right-sidebar">
     <div class="settings">
-      <button onclick="logout()">⚙ Sair</button>
+      <button id="logout-btn">⚙ Sair</button>
     </div>
   </nav>
 
@@ -180,6 +181,7 @@
     const mainContent = document.getElementById('main-content');
     const userName = document.getElementById('user-name');
     const userAvatar = document.getElementById('user-avatar');
+    const logoutBtn = document.getElementById('logout-btn');
 
     // Configuração do Firebase
     const firebaseConfig = {
@@ -249,6 +251,9 @@
       leftSidebar.classList.remove('active');
       rightSidebar.classList.remove('active');
     });
+
+    // Ação do botão de logout
+    logoutBtn.addEventListener('click', logout);
 
     // Verificar autenticação ao carregar a página
     window.onload = checkAuthentication;
